@@ -15,6 +15,9 @@ public class CoreTest {
     @Test public void noGradesHaveNoAverage(){assertNull(Core.weighted(Collections.emptyList()));assertNull(Core.overall(Arrays.asList(null,null)));}
     @Test public void subjectsHaveEqualOverallWeight(){assertEquals(70d,Core.overall(Arrays.asList(100d,40d,null)),0);}
     @Test public void persianNumbersAreAccepted(){assertEquals(18.5,Core.number("۱۸٫۵",0,20,"نمره"),0);assertEquals("16:30",Core.ascii("۱۶:۳۰"));}
+    @Test(expected=IllegalArgumentException.class) public void negativeMinutesAreRejected(){Core.number("-۳۰",0,1440,"دقیقه");}
+    @Test public void decimalInputIsNeverConcatenated(){assertEquals(1.5,Core.number("۱٫۵",0,20,"نمره"),0);assertNotEquals(15d,Core.number("1.5",0,20,"نمره"),0);}
+    @Test(expected=IllegalArgumentException.class) public void malformedNumberIsRejected(){Core.number("۱x۵",0,1440,"دقیقه");}
     @Test(expected=IllegalArgumentException.class) public void nonfiniteInputIsRejected(){Core.number("NaN",0,20,"نمره");}
     @Test public void recurrenceIncludesBounds(){assertEquals(Arrays.asList("2026-10-19","2026-10-26"),Core.recurrence("2026-10-19","2026-10-26",EnumSet.of(DayOfWeek.MONDAY),true));}
     @Test public void singleSessionHasOneDate(){assertEquals(1,Core.recurrence("2026-10-19","2026-10-19",Collections.emptySet(),false).size());}
