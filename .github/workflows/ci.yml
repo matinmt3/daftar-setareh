@@ -53,3 +53,55 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - run: chmod +x gradlew
       - run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+
+  static-web:
+    permissions:
+      contents: read
+      pages: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.4.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:web
+      - run: npm run test:web
+      - name: Preserve browser QA evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: static-web-qa
+          path: |
+            test-results/offline-web-results.json
+            test-results/offline-web/
+            playwright-report/offline-web/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Configure public Pages deployment
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Upload static website
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: static-dist
+  publish-web:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [web, android, static-web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish validated standalone website
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

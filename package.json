@@ -1,6 +1,6 @@
 {
   "name": "daftar-setareh",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "دفتر ستاره — پلتفرم برنامه‌ریزی، گزارش روزانه و پیشرفت تحصیلی دانش‌آموزان",
@@ -11,13 +11,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "oxlint src tests e2e scripts",
+    "lint": "oxlint src tests e2e scripts web-offline",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "db:seed": "tsx scripts/seed.ts",
-    "db:reset": "tsx scripts/reset-db.ts"
+    "db:reset": "tsx scripts/reset-db.ts",
+    "build:web": "node scripts/build-static-web.mjs",
+    "preview:web": "node scripts/serve-static-web.mjs",
+    "test:web": "playwright test --config web-offline/qa/playwright.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/vazirmatn": "^5.3.0",
@@ -56,6 +59,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/three": "^0.186.0",
+    "esbuild": "0.28.2",
     "oxlint": "^1.81.0",
     "tsx": "^4.21.0",
     "typescript": "~6.0.2",

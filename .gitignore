@@ -47,3 +47,6 @@ signing*.properties
 *.zip
 .DS_Store
 Thumbs.db
+
+# Standalone web build output
+static-dist/
