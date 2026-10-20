@@ -52,7 +52,7 @@ export default async function PlannerPage({
       <PageHeader
         eyebrow={formatFullDate(today)}
         title="برنامهٔ مطالعه"
-        description="هفته را روی کاغذ نیاور؛ اینجا بچین. جلسه‌های کوچک، هدف‌های روشن و ستاره‌هایی که یکی‌یکی روشن می‌شوند."
+        description="زمان درس‌ها را برای هر روز مشخص کن. برای شروع، یک جلسه اضافه کن."
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">

@@ -21,7 +21,7 @@ export default async function NewReportPage({
   const params = await searchParams;
   const reportDate = params.date && isValidISODate(params.date) ? params.date : todayISO();
   const additional = params.additional === "1";
-  const subjects = listSubjects(user.id, true);
+  const subjects = listSubjects(user.id);
   const existingReports = getReportsForDate(user.id, reportDate);
   const existing = existingReports[0] ?? null;
 
@@ -75,11 +75,11 @@ export default async function NewReportPage({
     <div className="mx-auto max-w-4xl">
       <PageHeader
         eyebrow="گزارش روزانه"
-        title={additional ? "گزارش تکمیلی امروز" : "امروز چه‌کار کردی؟"}
+        title={additional ? "افزودن مطالعهٔ امروز" : "ثبت مطالعه"}
         description={
           additional
-            ? `این گزارش بعد از گزارش اصلی همین روز ثبت می‌شود (${reportEntryTitle(existingReports.length)}).`
-            : "کوتاه بنویس؛ فقط چیزهایی را که واقعاً امروز اتفاق افتاده ثبت کن. دفتر بقیه را خودش جمع می‌کند."
+            ? "مطالعهٔ جدید به جمع امروز اضافه می‌شود؛ زمان‌های قبلی را دوباره وارد نکن."
+            : "فقط زمان درس‌هایی را که خوانده‌ای وارد کن. بقیهٔ بخش‌ها اختیاری هستند."
         }
         backHref="/app/reports"
         backLabel="همهٔ گزارش‌ها"

@@ -27,6 +27,7 @@ async function createSession(page: Page, title: string) {
   const dialog = page.getByRole("dialog", { name: "جلسهٔ تازه", exact: true });
   await dialog.getByLabel("عنوان جلسه").fill(title);
   await dialog.getByLabel("درس", { exact: true }).selectOption("");
+  await dialog.getByText("نوع، اولویت و یادآور (اختیاری)", { exact: true }).click();
   await dialog.getByLabel("یادآور قبل از شروع (دقیقه)").fill("۰");
   await dialog.getByRole("button", { name: "افزودن جلسه", exact: true }).click();
   await expect(dialog).not.toBeVisible();
@@ -35,13 +36,21 @@ async function createSession(page: Page, title: string) {
   return chip;
 }
 
-test("private routes redirect an unauthenticated visitor and invalid phone stays on the form", async ({ page }) => {
+test("private routes redirect and unavailable SMS never promises to send a code", async ({ page }) => {
   await page.goto("/app/planner", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/auth$/);
-  await page.getByLabel("شمارهٔ موبایل", { exact: true }).fill("۱۲۳");
-  await page.getByRole("button", { name: "دریافت کد تأیید", exact: true }).click();
-  await expect(page.locator("#auth-error").getByRole("alert")).toContainText("شمارهٔ موبایل معتبر نیست");
-  await expect(page.getByLabel("شمارهٔ موبایل", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  const phone = page.getByLabel("شمارهٔ موبایل", { exact: true });
+  const send = page.getByRole("button", { name: "دریافت کد تأیید", exact: true });
+  if (await send.isDisabled()) {
+    await expect(phone).toBeDisabled();
+    await expect(page.locator("#phone-hint")).toContainText("ورود با پیامک در این نسخه فعال نیست");
+  } else {
+    await phone.fill("۱۲۳");
+    await send.click();
+    await expect(page.locator("#auth-error").getByRole("alert")).toContainText("شمارهٔ موبایل معتبر نیست");
+    await expect(phone).toHaveAttribute("aria-invalid", "true");
+  }
+  await expect(page.getByRole("button", { name: "ورود به حساب نمایشی", exact: true })).toBeEnabled();
   await expect(page.getByLabel("کد تأیید ۶ رقمی", { exact: true })).toHaveCount(0);
 });
 
@@ -50,6 +59,14 @@ test("report creates Persian-digit study time and a subjectless task, edits afte
   await loginAsDemo(page);
   await page.goto("/app/reports/new?additional=1", { waitUntil: "domcontentloaded" });
   const minutes = page.getByRole("textbox", { name: /^دقیقهٔ مطالعه / }).first();
+  for (const invalid of ["-30", "1.5"]) {
+    await minutes.fill(invalid);
+    await expect(minutes).toHaveValue(invalid);
+    await page.getByRole("button", { name: "ثبت گزارش", exact: true }).click();
+    await expect(minutes).toHaveAttribute("aria-invalid", "true");
+    await expect(minutes).toBeFocused();
+    await expect(page).toHaveURL(/\/app\/reports\/new/);
+  }
   await minutes.fill("۴۵");
   await expect(minutes).toHaveValue("45");
   await page.getByRole("button", { name: "افزودن کار", exact: true }).click();
@@ -283,4 +300,63 @@ test("320px planner keeps page/dialog/calendar inside viewport with Escape and f
   await expect(trigger).toBeFocused();
   await page.getByRole("navigation", { name: "ناوبری اصلی", exact: true }).getByRole("link", { name: "آزمون‌ها", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/exams$/);
+});
+
+
+test("today has one study action and mobile More exposes every secondary destination", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginAsDemo(page);
+  await expect(page.getByRole("heading", { level: 1, name: "امروز", exact: true })).toBeVisible();
+  const study = page.getByRole("link", { name: "ثبت مطالعه", exact: true });
+  await expect(study).toHaveCount(1);
+  await expect(study).toHaveAttribute("href", "/app/reports/new?additional=1");
+  await study.click();
+  await expect(page.getByRole("heading", { level: 1, name: "افزودن مطالعهٔ امروز", exact: true })).toBeVisible();
+  await expect(page.getByText("این روز قبلاً ثبت شده است")).toHaveCount(0);
+  const notes = page.getByText("یادداشت‌های بیشتر (اختیاری)", { exact: true });
+  await expect(page.getByLabel("هدف فردا")).not.toBeVisible();
+  await notes.click();
+  await expect(page.getByLabel("هدف فردا")).toBeVisible();
+  const more = page.getByRole("navigation", { name: "ناوبری اصلی", exact: true }).getByRole("button", { name: "بیشتر", exact: true });
+  await more.click();
+  let dialog = page.getByRole("dialog", { name: "بخش‌های دیگر", exact: true });
+  await expect(dialog.getByRole("link", { name: "کارنامه‌ها", exact: true })).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "تحلیل پیشرفت", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(more).toBeFocused();
+  await more.click();
+  dialog = page.getByRole("dialog", { name: "بخش‌های دیگر", exact: true });
+  await dialog.getByRole("link", { name: "تنظیمات و درس‌ها", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/settings$/);
+  await expect(dialog).not.toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("all app screens stay readable inside mobile, tablet and desktop viewports", async ({ page }, testInfo) => {
+  test.setTimeout(180_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await loginAsDemo(page);
+  const screens = [
+    ["today", "/app"], ["study", "/app/reports/new?additional=1"],
+    ["planner", "/app/planner"], ["exams", "/app/exams"],
+    ["cards", "/app/cards"], ["analytics", "/app/analytics"], ["settings", "/app/settings"],
+  ];
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 960 });
+    for (const [label, route] of screens) {
+      await page.goto(route, { waitUntil: "networkidle" });
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${label} at ${width}px must not overflow`).toBe(true);
+      if (width === 320 || width === 1440) {
+        const screenshot = testInfo.outputPath(`${label}-${width}.png`);
+        await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
+        await testInfo.attach(`${label}-${width}`, { path: screenshot, contentType: "image/png" });
+      }
+    }
+  }
+  expect(errors).toEqual([]);
 });

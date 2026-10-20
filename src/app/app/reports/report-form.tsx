@@ -1,14 +1,11 @@
 "use client";
 
 import { useMemo, useState, useTransition, type FormEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  CalendarDays,
   CheckCircle2,
   ChevronDown,
   ClipboardCheck,
-  Loader2,
   NotebookPen,
   Plus,
   Send,
@@ -17,15 +14,14 @@ import {
 } from "lucide-react";
 import { saveReportAction } from "@/server/actions/reports";
 import type { DailyReport, ReportTask, Subject } from "@/lib/types";
-import { faNum, toLatinDigits, toPersianDigits } from "@/lib/format";
-import { reportEntryTitle } from "@/lib/constants";
-import { formatNumericDate } from "@/lib/dates";
+import { faMinutes, toLatinDigits } from "@/lib/format";
 import { Field, InlineAlert, Input, Select, Textarea } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { JalaliDatePicker } from "@/components/ui/jalali-date-picker";
 import { SubjectIcon } from "@/components/subject-icon";
 import { showToast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
+import { parseStudyMinutes } from "@/lib/study-input";
 import { runAction } from "@/components/ui/run-action";
 
 type TaskDraft = {
@@ -135,16 +131,15 @@ export function ReportForm({
   const totalMinutes = useMemo(
     () =>
       Object.values(minutes).reduce((sum, value) => {
-        const number = Number(toLatinDigits(value).replace(/[^\d]/g, ""));
-        return sum + (Number.isFinite(number) ? number : 0);
+        const number = parseStudyMinutes(value);
+        return sum + (number ?? 0);
       }, 0),
     [minutes],
   );
   const filledSubjects = subjects.filter((subject) => {
-    const value = Number(toLatinDigits(minutes[subject.id] ?? "").replace(/[^\d]/g, ""));
+    const value = parseStudyMinutes(minutes[subject.id] ?? "") ?? 0;
     return value > 0 || (notes[subject.id] ?? "").trim().length > 0;
   }).length;
-  const completedTasks = tasks.filter((task) => task.status === "completed" && task.title.trim()).length;
 
   const updateTask = (key: string, patch: Partial<TaskDraft>) => {
     setTasks((current) => current.map((task) => (task.key === key ? { ...task, ...patch } : task)));
@@ -154,6 +149,12 @@ export function ReportForm({
     event.preventDefault();
     setError(null);
     setFieldErrors({});
+    const invalidSubject = subjects.find((subject) => parseStudyMinutes(minutes[subject.id] ?? "") === null);
+    if (invalidSubject) {
+      setError("زمان مطالعه را به دقیقه و با عدد صحیح بین ۰ تا ۱۴۴۰ وارد کن.");
+      document.getElementById(`minutes-${invalidSubject.id}`)?.focus();
+      return;
+    }
     const subjectPayload = subjects
       .map((subject) => ({
         subjectId: subject.id,
@@ -161,7 +162,7 @@ export function ReportForm({
         note: notes[subject.id] ?? "",
       }))
       .filter((subject) => {
-        const value = Number(toLatinDigits(String(subject.minutes)).replace(/[^\d]/g, ""));
+        const value = parseStudyMinutes(String(subject.minutes)) ?? 0;
         return value > 0 || subject.note.trim().length > 0;
       });
     const taskPayload = tasks
@@ -200,26 +201,20 @@ export function ReportForm({
   };
 
   return (
-    <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+    <form onSubmit={submit} className="space-y-5" aria-busy={pending}>
       <div className="space-y-5">
+        <div className="sticky top-20 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-white p-3 shadow-sm">
+          <div><p className="text-xs text-muted">جمع مطالعه</p><p className="num mt-1 text-sm font-bold">{faMinutes(totalMinutes)}</p></div>
+          <div className="flex items-center gap-2">
+          <Button type="submit" loading={pending} className="text-xs">
+            <Send className="size-4" aria-hidden="true" />
+            {initialReport ? "ذخیرهٔ تغییرات" : "ثبت گزارش"}
+          </Button>
+          </div>
+        </div>
         {error ? <InlineAlert title={error}>{fieldErrors._form?.join(" ")}</InlineAlert> : null}
 
         <section className="card p-4 sm:p-5">
-          <div className="mb-4 flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-violet-soft text-violet-deep">
-              <CalendarDays className="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="text-sm font-bold text-ink">تاریخ گزارش</h2>
-              <p className="mt-0.5 text-[0.65rem] text-muted">
-                {initialReport
-                  ? reportEntryTitle(initialReport.entryIndex)
-                  : allowAdditional
-                    ? `${reportEntryTitle(existingCount)} • گزارش تکمیلی`
-                    : "گزارش اصلی روز"}
-              </p>
-            </div>
-          </div>
           <div className="max-w-sm">
             <Field label="تاریخ" htmlFor="report-date" error={fieldErrors.reportDate?.[0]}>
               <JalaliDatePicker
@@ -255,6 +250,7 @@ export function ReportForm({
             <div className="space-y-2">
               {subjects.map((subject) => {
                 const noteOpen = openNotes.includes(subject.id);
+                const invalidMinutes = parseStudyMinutes(minutes[subject.id] ?? "") === null;
                 return (
                   <div
                     key={subject.id}
@@ -265,20 +261,24 @@ export function ReportForm({
                   >
                     <div className="flex items-center gap-2.5">
                       <SubjectIcon icon={subject.icon} color={subject.color} size="sm" />
-                      <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">
+                      <span className="min-w-0 flex-1 text-sm font-semibold leading-6 text-ink">
                         {subject.name}
                       </span>
                       <div className="relative w-24">
                         <Input
+                          id={`minutes-${subject.id}`}
                           type="text"
                           inputMode="numeric"
+                          maxLength={8}
+                          aria-invalid={invalidMinutes || undefined}
+                          aria-describedby={invalidMinutes ? `minutes-${subject.id}-error` : undefined}
                           className="num h-9 py-1 pl-9 pr-2 text-center text-xs"
                           placeholder="۰"
                           value={minutes[subject.id] ?? ""}
                           onChange={(event) =>
                             setMinutes((current) => ({
                               ...current,
-                              [subject.id]: toLatinDigits(event.target.value).replace(/\D/g, ""),
+                              [subject.id]: toLatinDigits(event.target.value),
                             }))
                           }
                           aria-label={`دقیقهٔ مطالعه ${subject.name}`}
@@ -306,6 +306,7 @@ export function ReportForm({
                         <ChevronDown className={cn("size-3.5 transition-transform", noteOpen && "rotate-180")} aria-hidden="true" />
                       </button>
                     </div>
+                    {invalidMinutes ? <p id={`minutes-${subject.id}-error`} className="mt-2 text-xs text-[#9e2c46]" role="alert">عدد صحیح بین ۰ تا ۱۴۴۰ دقیقه وارد کن.</p> : null}
                     {noteOpen ? (
                       <Input
                         className="mt-2 h-9 bg-white py-1 text-xs"
@@ -347,8 +348,8 @@ export function ReportForm({
             </button>
           </div>
           {tasks.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-line bg-[#fdfaf4] px-3 py-5 text-center text-[0.68rem] text-muted">
-              اگر امروز کاری انجام دادی، همین‌جا اضافه کن. اگر نه، خالی بگذار.
+            <p className="rounded-xl bg-paper px-3 py-2 text-[0.68rem] text-muted">
+              اختیاری؛ می‌توانی فقط زمان مطالعه را ثبت کنی.
             </p>
           ) : (
             <div className="space-y-2">
@@ -406,24 +407,25 @@ export function ReportForm({
         </section>
 
         <section className="card p-4 sm:p-5">
-          <div className="mb-4">
-            <h2 className="flex items-center gap-2 text-sm font-bold text-ink">
-              <Sparkles className="size-4 text-gold" aria-hidden="true" />
-              چند خط بیشتر
-            </h2>
-            <p className="mt-1 text-[0.65rem] text-muted">
-              این بخش اختیاری است؛ اما نوشتنش کمک می‌کند هفته را بهتر ببینی.
-            </p>
-          </div>
+          <Field label="یک جمله دربارهٔ امروز" htmlFor="report-reflection" hint="اختیاری" error={fieldErrors.reflection?.[0]}>
+            <Textarea id="report-reflection" className="min-h-20" value={texts.reflection} maxLength={1500}
+              placeholder="امروز چطور گذشت؟" onChange={(event) => setTexts((current) => ({ ...current, reflection: event.target.value }))} />
+          </Field>
+        </section>
+        <details className="card p-4 sm:p-5" open={Boolean(initialReport && [initialReport.lessonsReviewed, initialReport.exercises, initialReport.difficulties, initialReport.nextDayGoals].some(Boolean)) || undefined}>
+          <summary className="flex items-center gap-2 text-sm font-semibold text-ink">
+            <Sparkles className="size-4 text-violet-deep" aria-hidden="true" />یادداشت‌های بیشتر (اختیاری)
+          </summary>
+          <p className="my-3 text-sm leading-7 text-muted">مرور درس‌ها، تمرین‌ها و برنامهٔ فردا را در صورت نیاز اضافه کن.</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            {textFields.map((item, index) => (
+            {textFields.filter((item) => item.key !== "reflection").map((item, index) => (
               <Field
                 key={item.key}
                 label={item.label}
                 htmlFor={`report-${item.key}`}
                 hint={item.hint}
                 error={fieldErrors[item.key]?.[0]}
-                className={index === 4 ? "sm:col-span-2" : undefined}
+                className={index === 3 ? "sm:col-span-2" : undefined}
               >
                 <Textarea
                   id={`report-${item.key}`}
@@ -436,60 +438,11 @@ export function ReportForm({
               </Field>
             ))}
           </div>
-        </section>
+        </details>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 lg:hidden">
-          <Link href="/app/reports" className="btn btn-ghost text-xs">انصراف</Link>
-          <Button type="submit" loading={pending} className="text-xs">
-            <Send className="size-4" aria-hidden="true" />
-            {initialReport ? "ذخیرهٔ تغییرات" : "ثبت گزارش"}
-          </Button>
-        </div>
       </div>
 
-      <aside className="hidden lg:block">
-        <div className="sticky top-24 space-y-3">
-          <div className="card overflow-hidden">
-            <div className="bg-night p-4 text-white">
-              <p className="text-[0.6rem] text-white/55">جمع امروز</p>
-              <p className="num mt-1 text-2xl font-extrabold">
-                {faNum(Math.floor(totalMinutes / 60))}
-                <span className="mx-0.5 text-sm text-white/50">:</span>
-                {toPersianDigits(String(totalMinutes % 60).padStart(2, "0"))}
-              </p>
-              <p className="mt-1 text-[0.6rem] text-white/50">ساعت مطالعه</p>
-            </div>
-            <div className="space-y-2.5 p-4 text-[0.68rem]">
-              <div className="flex items-center justify-between">
-                <span className="text-muted">درس‌های ثبت‌شده</span>
-                <span className="num font-bold">{filledSubjects} از {subjects.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted">کارهای انجام‌شده</span>
-                <span className="num font-bold">{completedTasks} از {tasks.filter((task) => task.title.trim()).length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted">تاریخ</span>
-                <span className="num font-semibold">{formatNumericDate(reportDate)}</span>
-              </div>
-            </div>
-            <div className="border-t border-line p-3">
-              <Button type="submit" loading={pending} block className="text-xs">
-                <Send className="size-4" aria-hidden="true" />
-                {initialReport ? "ذخیرهٔ تغییرات" : "ثبت گزارش"}
-              </Button>
-              <Link href="/app/reports" className="btn btn-ghost mt-1.5 w-full text-[0.68rem]">انصراف</Link>
-            </div>
-          </div>
-          <p className="px-1 text-[0.6rem] leading-5 text-muted">
-            {pending ? (
-              <span className="flex items-center gap-1.5"><Loader2 className="size-3 animate-spin" /> در حال ذخیره...</span>
-            ) : (
-              "می‌توانی بعداً هم همین گزارش را ویرایش کنی."
-            )}
-          </p>
-        </div>
-      </aside>
+
     </form>
   );
 }

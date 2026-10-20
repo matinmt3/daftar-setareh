@@ -146,7 +146,7 @@ export function PlannerBoard({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-extrabold text-ink">هفتهٔ پیشِ رو</h2>
-            <p className="mt-0.5 text-[0.62rem] text-muted">ستاره‌ها را یکی‌یکی روشن کن؛ هر جلسه یک قدم است.</p>
+            <p className="mt-0.5 text-[0.62rem] text-muted">جلسه‌های هر روز را ببین و کارهای انجام‌شده را علامت بزن.</p>
           </div>
           <span className="hidden items-center gap-1 rounded-full bg-paper px-2.5 py-1 text-[0.58rem] text-muted sm:flex">
             <Sparkles className="size-3" aria-hidden="true" />
@@ -154,8 +154,8 @@ export function PlannerBoard({
           </span>
         </div>
 
-        <div className="overflow-x-auto pb-1">
-          <div className="grid min-w-[55rem] grid-cols-7 gap-2">
+        <div className="pb-1">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-7 xl:gap-2">
             {weekDates.map((date) => {
               const daySessions = byDate.get(date) ?? [];
               const dayMinutes = daySessions.reduce((sum, session) => sum + session.durationMinutes, 0);
@@ -165,7 +165,7 @@ export function PlannerBoard({
                 <div
                   key={date}
                   className={cn(
-                    "flex min-h-[15rem] flex-col rounded-xl border p-2 transition-colors",
+                    "flex min-h-32 flex-col rounded-xl border p-3 transition-colors xl:min-h-[15rem] xl:p-2",
                     isToday ? "border-violet/40 bg-violet-soft/30" : "border-line/80 bg-[#fcfaf6]",
                   )}
                 >

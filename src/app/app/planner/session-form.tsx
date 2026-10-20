@@ -174,23 +174,11 @@ export function SessionForm({
             ))}
           </Select>
         </Field>
-        <Field label="نوع" htmlFor="session-kind" error={fieldErrors.kind?.[0]}>
-          <Select id="session-kind" value={kind} onChange={(event) => setKind(event.target.value as SessionKind)}>
-            {SESSION_KINDS.map((item) => (
-              <option key={item.value} value={item.value}>{item.label}</option>
-            ))}
-          </Select>
-        </Field>
+
         <Field label={mode === "series" && !editing ? "شروع از" : "تاریخ"} htmlFor="session-date" required error={fieldErrors.sessionDate?.[0] ?? fieldErrors.startDate?.[0]}>
           <JalaliDatePicker id="session-date" value={date} onChange={setDate} />
         </Field>
-        <Field label="اولویت" htmlFor="session-priority" error={fieldErrors.priority?.[0]}>
-          <Select id="session-priority" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
-            {PRIORITIES.map((item) => (
-              <option key={item.value} value={item.value}>{item.label}</option>
-            ))}
-          </Select>
-        </Field>
+
         <Field label="ساعت شروع" htmlFor="session-start" required error={fieldErrors.startTime?.[0]}>
           <Input
             id="session-start"
@@ -225,19 +213,7 @@ export function SessionForm({
             />
           </Field>
         )}
-        <Field
-          label="یادآور قبل از شروع (دقیقه)"
-          htmlFor="session-reminder"
-          error={fieldErrors.reminderMinutes?.[0]}
-          hint="۰ یعنی بدون یادآور."
-        >
-          <Input
-            id="session-reminder"
-            inputMode="numeric"
-            value={reminderMinutes}
-            onChange={(event) => setReminderMinutes(event.target.value)}
-          />
-        </Field>
+
         {editing && session?.seriesId ? (
           <Field label="اعمال تغییر روی" htmlFor="session-scope" className="sm:col-span-2">
             <Select id="session-scope" value={scope} onChange={(event) => setScope(event.target.value as Scope)}>
@@ -284,6 +260,38 @@ export function SessionForm({
         </>
       ) : null}
 
+      <details className="rounded-xl border border-line p-3" open={Boolean(session && (session.notes || session.kind !== "study" || session.priority !== "medium" || session.reminderMinutes !== 15)) || undefined}>
+        <summary className="text-sm font-semibold text-ink-soft">نوع، اولویت و یادآور (اختیاری)</summary>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Field label="نوع" htmlFor="session-kind" error={fieldErrors.kind?.[0]}>
+          <Select id="session-kind" value={kind} onChange={(event) => setKind(event.target.value as SessionKind)}>
+            {SESSION_KINDS.map((item) => (
+              <option key={item.value} value={item.value}>{item.label}</option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="اولویت" htmlFor="session-priority" error={fieldErrors.priority?.[0]}>
+          <Select id="session-priority" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
+            {PRIORITIES.map((item) => (
+              <option key={item.value} value={item.value}>{item.label}</option>
+            ))}
+          </Select>
+        </Field>
+        <Field
+          label="یادآور قبل از شروع (دقیقه)"
+          htmlFor="session-reminder"
+          error={fieldErrors.reminderMinutes?.[0]}
+          hint="۰ یعنی بدون یادآور."
+        >
+          <Input
+            id="session-reminder"
+            inputMode="numeric"
+            value={reminderMinutes}
+            onChange={(event) => setReminderMinutes(event.target.value)}
+          />
+        </Field>
+        </div>
+        <div className="mt-4">
       <Field label="یادداشت" htmlFor="session-notes" error={fieldErrors.notes?.[0]}>
         <Textarea
           id="session-notes"
@@ -294,6 +302,8 @@ export function SessionForm({
           onChange={(event) => setNotes(event.target.value)}
         />
       </Field>
+        </div>
+      </details>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
         {editing && session ? (

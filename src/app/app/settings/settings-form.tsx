@@ -191,7 +191,7 @@ export function SettingsForm({ user }: { user: User }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-line pt-3">
+      <div className="flex flex-col items-start gap-3 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="flex items-center gap-1 text-[0.58rem] text-muted">
           <UserRound className="size-3" aria-hidden="true" />
           تغییرات فقط روی حساب خودت اعمال می‌شود.

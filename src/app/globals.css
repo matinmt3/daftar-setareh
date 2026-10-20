@@ -4,18 +4,18 @@
   --font-sans: "Vazirmatn Variable", "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Lalezar", "Vazirmatn Variable", sans-serif;
 
-  --color-paper: #fbf8f1;
-  --color-paper-deep: #f3ecdf;
-  --color-cream: #fffdf8;
-  --color-ink: #252136;
-  --color-ink-soft: #4b4560;
-  --color-muted: #6f677e;
-  --color-line: #e8e1d5;
-  --color-night: #211b3f;
-  --color-night-soft: #302754;
-  --color-violet: #6d5bf6;
-  --color-violet-deep: #4e3ad8;
-  --color-violet-soft: #efecff;
+  --color-paper: #f7f8fa;
+  --color-paper-deep: #eef2f5;
+  --color-cream: #ffffff;
+  --color-ink: #182a32;
+  --color-ink-soft: #344b55;
+  --color-muted: #526571;
+  --color-line: #e2e8ed;
+  --color-night: #153e3c;
+  --color-night-soft: #23534f;
+  --color-violet: #0f766e;
+  --color-violet-deep: #0c625c;
+  --color-violet-soft: #e6f3f1;
   --color-coral: #f2748b;
   --color-coral-soft: #ffecef;
   --color-gold: #e5b23c;
@@ -27,8 +27,8 @@
   --color-peach: #f6a567;
   --color-plum: #a04f9e;
 
-  --shadow-card: 0 18px 50px -28px rgba(42, 31, 82, 0.28);
-  --shadow-float: 0 28px 80px -32px rgba(42, 31, 82, 0.4);
+  --shadow-card: 0 1px 2px rgba(24, 42, 50, 0.03);
+  --shadow-float: 0 12px 32px -16px rgba(24, 42, 50, 0.18);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 
   --radius-4xl: 2rem;
@@ -172,10 +172,7 @@
 
 @layer components {
   .app-shell-bg {
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(109, 91, 246, 0.09), transparent 28rem),
-      radial-gradient(circle at 90% 0%, rgba(242, 116, 139, 0.08), transparent 30rem),
-      radial-gradient(circle at 76% 92%, rgba(229, 178, 60, 0.08), transparent 26rem);
+    background: var(--color-paper);
   }
 
   .paper-grid {
@@ -201,24 +198,23 @@
   }
 
   .card {
-    border: 1px solid rgba(232, 225, 213, 0.9);
-    border-radius: 1.5rem;
-    background: rgba(255, 253, 248, 0.86);
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    background: var(--color-cream);
     box-shadow: var(--shadow-card);
-    backdrop-filter: blur(12px);
   }
 
   .card-flat {
-    border: 1px solid rgba(232, 225, 213, 0.9);
-    border-radius: 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
     background: var(--color-cream);
   }
 
   .field {
     width: 100%;
-    border: 1px solid #ded6c8;
+    border: 1px solid var(--color-line);
     border-radius: 0.95rem;
-    background: #fffdf9;
+    background: #fff;
     padding: 0.72rem 0.95rem;
     color: var(--color-ink);
     font-size: 0.925rem;
@@ -230,17 +226,17 @@
   }
 
   .field::placeholder {
-    color: #756b81;
+    color: var(--color-muted);
   }
 
   .field:hover {
-    border-color: #cfc4b3;
+    border-color: #9cafb7;
   }
 
   .field:focus {
     border-color: var(--color-violet);
     background: #fff;
-    box-shadow: 0 0 0 4px rgba(109, 91, 246, 0.12);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
     outline: none;
   }
 
@@ -294,14 +290,14 @@
   }
 
   .btn-primary {
-    background: linear-gradient(180deg, var(--color-violet), #5e4ce8);
+    background: var(--color-violet);
     color: #fff;
-    box-shadow: 0 12px 28px -14px rgba(109, 91, 246, 0.7);
+    box-shadow: none;
   }
 
   .btn-primary:hover {
-    background: linear-gradient(180deg, #6c5bfa, var(--color-violet-deep));
-    box-shadow: 0 16px 30px -14px rgba(109, 91, 246, 0.8);
+    background: var(--color-violet-deep);
+    box-shadow: none;
   }
 
   .btn-coral {
@@ -311,14 +307,14 @@
   }
 
   .btn-secondary {
-    border-color: #ded6c8;
-    background: #fffdf9;
+    border-color: var(--color-line);
+    background: #fff;
     color: var(--color-ink);
     box-shadow: var(--shadow-inset);
   }
 
   .btn-secondary:hover {
-    border-color: #c9bfae;
+    border-color: #9cafb7;
     background: #fff;
   }
 
@@ -360,7 +356,7 @@
     gap: 0.4rem;
     border: 1px solid var(--color-line);
     border-radius: 999px;
-    background: rgba(255, 253, 248, 0.7);
+    background: #fff;
     padding: 0.32rem 0.7rem;
     color: var(--color-ink-soft);
     font-size: 0.76rem;
@@ -435,7 +431,7 @@
   }
 
   .data-table th {
-    background: #f7f2e9;
+    background: var(--color-paper);
     padding: 0.7rem 0.85rem;
     color: var(--color-muted);
     font-size: 0.72rem;
@@ -444,7 +440,7 @@
   }
 
   .data-table td {
-    border-top: 1px solid #eee7db;
+    border-top: 1px solid var(--color-line);
     padding: 0.8rem 0.85rem;
     vertical-align: middle;
   }
@@ -528,3 +524,14 @@
   font-variant-numeric: tabular-nums lining-nums;
   font-feature-settings: "tnum";
 }
+
+/* These scoped rules intentionally follow utility layers so tiny old labels remain readable. */
+  .app-content :is(p, span, button, a, td, th, li, label, input, select, textarea)[class*="text-[0."] {
+    font-size: 0.8125rem;
+  }
+  .app-content .btn, .app-content .field { min-height: 2.75rem; }
+  .app-content .field { font-size: 0.9375rem; }
+  .app-content .display-title { font-family: var(--font-sans); font-weight: 750; }
+  .app-content :is(.card, .card-flat) { box-shadow: none; }
+  .app-content :is(.bg-\[\#fdfaf4\], .bg-\[\#fcfaf6\], .bg-\[\#f7f2e9\]) { background: var(--color-paper); }
+  .app-content summary { min-height: 2.75rem; cursor: pointer; }

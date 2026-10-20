@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Bell, LogOut, NotebookPen, Settings2, Sparkles } from "lucide-react";
+import { CircleHelp, LogOut, Settings2, Sparkles } from "lucide-react";
 import { requireOnboardedUser } from "@/server/auth/session";
 import { upcomingSessions } from "@/server/repositories/planner";
 import { logoutAction } from "@/server/actions/auth";
 import { formatFullDate, todayISO } from "@/lib/dates";
 import { gradeLabel } from "@/lib/constants";
-import { Brand, BrandMark } from "@/components/brand";
+import { Brand } from "@/components/brand";
 import { MobileNav, SidebarNav } from "@/components/app-shell";
 import { ReminderScheduler } from "@/components/reminders";
 import { Badge } from "@/components/ui/badge";
@@ -24,17 +24,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="app-shell-bg min-h-dvh">
+      <a href="#app-main" className="sr-only z-50 focus:not-sr-only focus:fixed focus:right-4 focus:top-4 focus:rounded-lg focus:bg-white focus:p-3">رفتن به محتوای اصلی</a>
       <div className="mx-auto flex min-h-dvh w-full max-w-[1500px]">
-        <aside className="app-sidebar sticky top-0 hidden h-dvh w-[17.5rem] shrink-0 flex-col border-l border-[#e7dfd2] bg-cream/70 px-4 py-5 backdrop-blur-xl lg:flex">
+        <aside className="app-sidebar sticky top-0 hidden h-dvh w-[15rem] shrink-0 flex-col border-l border-line bg-white px-4 py-5 lg:flex">
           <div className="px-1">
             <Brand href="/app" />
           </div>
           <div className="mt-7 flex-1 overflow-y-auto pb-4">
             <SidebarNav />
           </div>
-          <div className="rounded-2xl border border-[#e6ded1] bg-[#fbf7ef] p-3">
+          <div className="rounded-xl border border-line bg-paper p-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-[#9c8cff] text-sm font-extrabold text-white shadow-sm">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-violet text-sm font-extrabold text-white shadow-sm">
                 {(user.name ?? "س").slice(0, 1)}
               </span>
               <div className="min-w-0 flex-1">
@@ -69,12 +70,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </aside>
 
         <div className="min-w-0 flex-1 pb-24 lg:pb-8">
-          <header className="app-topbar sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e7dfd2]/80 bg-paper/85 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+          <header className="app-topbar sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 lg:hidden">
               <Brand href="/app" compact />
             </div>
             <div className="hidden items-center gap-2 text-xs text-muted lg:flex">
-              <Bell className="size-3.5" aria-hidden="true" />
+              <span className="size-2 rounded-full bg-violet" aria-hidden="true" />
               <span>{formatFullDate(today)}</span>
               {user.isDemo ? (
                 <Badge tone="gold">
@@ -85,28 +86,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
             <div className="flex items-center gap-2">
               <Link
-                href="/app/reports/new"
-                className="btn btn-primary min-h-9 px-3 text-xs"
+                href="/guide"
+                className="btn btn-ghost min-h-10 px-3 text-sm"
               >
-                <NotebookPen className="size-3.5" aria-hidden="true" />
-                ثبت گزارش امروز
+                <CircleHelp className="size-4" aria-hidden="true" />
+                راهنما
               </Link>
               <Link
                 href="/app/settings"
-                className="flex size-9 items-center justify-center rounded-xl border border-[#e2d9cb] bg-cream text-xs font-extrabold text-violet-deep lg:hidden"
+                className="flex size-9 items-center justify-center rounded-xl border border-line bg-cream text-xs font-extrabold text-violet-deep lg:hidden"
                 aria-label="تنظیمات و حساب کاربری"
               >
                 {(user.name ?? "س").slice(0, 1)}
               </Link>
             </div>
           </header>
-          <div className="mx-auto w-full max-w-[1180px] px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+          <main id="app-main" className="app-content mx-auto w-full max-w-[1180px] px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
             {children}
-          </div>
+          </main>
         </div>
-      </div>
-      <div className="pointer-events-none fixed bottom-24 right-4 z-20 hidden text-[#bcb3a4] lg:block" aria-hidden="true">
-        <BrandMark size={22} />
       </div>
       <MobileNav />
       <Toaster />

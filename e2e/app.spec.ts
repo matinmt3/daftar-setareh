@@ -32,11 +32,11 @@ test("demo login opens every main app page", async ({ page }) => {
   await loginAsDemo(page);
 
   await expect(page.locator("h1").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "داشبورد" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "امروز", exact: true }).first()).toBeVisible();
 
   const pages: { path: string; heading: string }[] = [
     { path: "/app/reports", heading: "گزارش‌های من" },
-    { path: "/app/reports/new?additional=1", heading: "گزارش تکمیلی امروز" },
+    { path: "/app/reports/new?additional=1", heading: "افزودن مطالعهٔ امروز" },
     { path: "/app/exams", heading: "آزمون‌ها و نمره‌ها" },
     { path: "/app/cards", heading: "کارنامه‌های من" },
     { path: "/app/planner", heading: "برنامهٔ مطالعه" },

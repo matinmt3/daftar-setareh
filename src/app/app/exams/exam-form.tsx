@@ -128,6 +128,20 @@ export function ExamForm({
             onChange={(event) => setMaxGrade(event.target.value)}
           />
         </Field>
+
+      </div>
+
+      {previewPercent !== null ? (
+        <div className="rounded-xl border border-violet/20 bg-violet-soft/55 px-3.5 py-2.5 text-[0.68rem] text-violet-deep">
+          پیش‌نمایش:{" "}
+          <span className="num font-bold">{faScoreFromPercent(previewPercent, gradeScale)}</span>{" "}
+          از {faNum(gradeScale)}
+        </div>
+      ) : null}
+
+      <details className="rounded-xl border border-line p-3" open={Boolean(exam?.notes || exam?.weight) || undefined}>
+        <summary className="text-sm font-semibold text-ink-soft">وزن آزمون و یادداشت (اختیاری)</summary>
+        <div className="mt-4 space-y-4">
         <Field
           label="وزن آزمون"
           htmlFor="exam-weight"
@@ -142,16 +156,6 @@ export function ExamForm({
             onChange={(event) => setWeight(event.target.value)}
           />
         </Field>
-      </div>
-
-      {previewPercent !== null ? (
-        <div className="rounded-xl border border-violet/20 bg-violet-soft/55 px-3.5 py-2.5 text-[0.68rem] text-violet-deep">
-          پیش‌نمایش:{" "}
-          <span className="num font-bold">{faScoreFromPercent(previewPercent, gradeScale)}</span>{" "}
-          از {faNum(gradeScale)}
-        </div>
-      ) : null}
-
       <Field label="یادداشت" htmlFor="exam-notes" error={fieldErrors.notes?.[0]}>
         <Textarea
           id="exam-notes"
@@ -162,6 +166,8 @@ export function ExamForm({
           onChange={(event) => setNotes(event.target.value)}
         />
       </Field>
+        </div>
+      </details>
 
       <div className="flex justify-end gap-2 border-t border-line pt-3">
         <Button variant="ghost" type="button" onClick={onDone} disabled={pending}>

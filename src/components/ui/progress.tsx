@@ -14,7 +14,7 @@ export function Progress({
 }) {
   const safe = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
   const colors: Record<string, string> = {
-    violet: "bg-gradient-to-l from-violet to-[#9a8bff]",
+    violet: "bg-violet",
     mint: "bg-gradient-to-l from-mint to-[#6bdfb8]",
     coral: "bg-gradient-to-l from-coral to-[#ffa3b3]",
     gold: "bg-gradient-to-l from-gold to-[#f4d06f]",
@@ -22,7 +22,7 @@ export function Progress({
   };
   return (
     <div
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-[#ece5d9]", className)}
+      className={cn("h-2 w-full overflow-hidden rounded-full bg-line", className)}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}

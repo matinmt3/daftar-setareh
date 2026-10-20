@@ -19,7 +19,7 @@ function isRedirectError(error: unknown): boolean {
   );
 }
 
-export function AuthForm({ demoEnabled }: { demoEnabled: boolean }) {
+export function AuthForm({ demoEnabled, loginMode }: { demoEnabled: boolean; loginMode: "sms" | "development" | "unavailable" }) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -50,6 +50,10 @@ export function AuthForm({ demoEnabled }: { demoEnabled: boolean }) {
     setNotice(null);
     if (!isValidIranianPhone(phone)) {
       setError("شمارهٔ موبایل معتبر نیست. مثل ۰۹۱۲۳۴۵۶۷۸۹ وارد کن.");
+      return;
+    }
+    if (loginMode === "unavailable") {
+      setError("ورود با پیامک در این نسخه فعال نیست.");
       return;
     }
     setPending(true);
@@ -142,16 +146,16 @@ export function AuthForm({ demoEnabled }: { demoEnabled: boolean }) {
               className="field num h-12 pr-14 text-left text-base tracking-wide"
               aria-describedby={error ? "phone-hint auth-error" : "phone-hint"}
               aria-invalid={error ? true : undefined}
-              disabled={pending}
-              autoFocus
+              disabled={pending || loginMode === "unavailable"}
+              autoFocus={loginMode !== "unavailable"}
             />
             <Smartphone className="pointer-events-none absolute inset-y-0 left-3 my-auto size-4 text-violet/65" aria-hidden="true" />
           </div>
           <p id="phone-hint" className="mt-2 text-[0.7rem] leading-6 text-muted">
-            کد تأیید از طریق پیامک ارسال می‌شود. شمارهٔ موبایل ایران را وارد کن.
+            {loginMode === "sms" ? "شمارهٔ موبایل ایران را وارد کن؛ کد تأیید با پیامک ارسال می‌شود." : loginMode === "development" ? "ورود توسعه فعال است؛ کد روی همین صفحه نمایش داده می‌شود و پیامک واقعی ارسال نمی‌شود." : demoEnabled ? "ورود با پیامک در این نسخه فعال نیست. برای دیدن امکانات از حساب نمایشی استفاده کن." : "ورود با پیامک در این نسخه فعال نیست. با مدیر سرویس تماس بگیر."}
           </p>
 
-          <button type="submit" className="btn btn-primary mt-5 h-12 w-full text-sm" disabled={pending}>
+          <button type="submit" className="btn btn-primary mt-5 h-12 w-full text-sm" disabled={pending || loginMode === "unavailable"}>
             {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <KeyRound className="size-4" aria-hidden="true" />}
             {pending ? "در حال ارسال کد..." : "دریافت کد تأیید"}
             {!pending ? <ArrowLeft className="size-4" aria-hidden="true" /> : null}
@@ -168,7 +172,7 @@ export function AuthForm({ demoEnabled }: { demoEnabled: boolean }) {
                 type="button"
                 onClick={loginDemo}
                 disabled={pending}
-                className="btn btn-secondary h-11 w-full text-xs"
+                className={cn("btn h-12 w-full text-sm", loginMode === "unavailable" ? "btn-primary" : "btn-secondary")}
               >
                 <Sparkles className="size-4 text-gold" aria-hidden="true" />
                 ورود به حساب نمایشی
@@ -187,7 +191,7 @@ export function AuthForm({ demoEnabled }: { demoEnabled: boolean }) {
                 <Smartphone className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <p className="text-[0.63rem] text-muted">کد برای این شماره فرستاده شد</p>
+                <p className="text-[0.63rem] text-muted">{loginMode === "development" ? "کد توسعه برای این شماره" : "کد برای این شماره فرستاده شد"}</p>
                 <p className="num text-xs font-bold text-ink" dir="ltr">
                   {toPersianDigits(normalizePhone(phone) ?? phone)}
                 </p>

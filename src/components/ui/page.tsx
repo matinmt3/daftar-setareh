@@ -19,7 +19,7 @@ export function PageHeader({
   backLabel?: string;
 }) {
   return (
-    <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {backHref ? (
           <Link
@@ -90,7 +90,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#dcd3c4] bg-[#fdfaf4] text-center",
+        "flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-paper text-center",
         compact ? "px-4 py-7" : "px-6 py-12",
         className,
       )}
@@ -148,17 +148,7 @@ export function StatCard({
       {delta !== undefined && delta !== null ? (
         <Delta value={delta} className="mt-2.5" suffix="واحد درصد" />
       ) : null}
-      <span
-        className={cn(
-          "pointer-events-none absolute -bottom-8 -left-5 size-20 rounded-full opacity-35 blur-2xl",
-          tone === "violet" && "bg-violet",
-          tone === "coral" && "bg-coral",
-          tone === "mint" && "bg-mint",
-          tone === "gold" && "bg-gold",
-          tone === "sky" && "bg-sky",
-        )}
-        aria-hidden="true"
-      />
+
     </div>
   );
 }
