@@ -4,6 +4,8 @@
 
 [باز کردن نسخهٔ وب](https://matinmt3.github.io/daftar-setareh/) · [دانلود اندروید](https://github.com/matinmt3/daftar-setareh/releases/latest) · [راهنمای وب](https://matinmt3.github.io/daftar-setareh/guide/) · [حریم خصوصی](https://matinmt3.github.io/daftar-setareh/privacy/)
 
+[گزارش آزمون و تصاویر نسخهٔ ۱٫۱٫۰](docs/QA-fa.md)
+
 ## چه چیزی ساده‌تر شده است؟
 
 - صفحهٔ «امروز» یک کار اصلی دارد: ثبت مطالعه. آمار و ابزارهای ثانویه از کار روزانه جدا شده‌اند.
