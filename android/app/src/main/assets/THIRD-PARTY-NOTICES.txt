@@ -1,0 +1,20 @@
+Daftar Setareh Offline - third-party notices
+
+Kotlin standard library 2.2.10
+Coordinates: org.jetbrains.kotlin:kotlin-stdlib:2.2.10
+Project: JetBrains Kotlin and contributors
+License: Apache License 2.0; see LICENSE-APACHE-2.0.txt in these assets.
+Source: https://github.com/JetBrains/kotlin/tree/v2.2.10
+
+JetBrains annotations 13.0
+Coordinates: org.jetbrains:annotations:13.0
+Project: JetBrains Java annotations
+License: Apache License 2.0; see LICENSE-APACHE-2.0.txt in these assets.
+Source: https://github.com/JetBrains/java-annotations
+
+Vazirmatn font
+Project: https://github.com/rastikerdar/vazirmatn
+License: SIL Open Font License 1.1; see OFL-Vazirmatn.txt in these assets.
+
+The runtime libraries above are included by the Android build dependency graph.
+The first-party application uses native Android APIs and requests no INTERNET permission.

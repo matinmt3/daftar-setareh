@@ -1,0 +1,31 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'ir.daftarsetareh.offline'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'ir.daftarsetareh.offline'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+        testInstrumentationRunner 'ir.daftarsetareh.offline.QARunner'
+    }
+    signingConfigs {
+        release {
+            if (System.getenv('DAFTAR_KEYSTORE')) {
+                storeFile file(System.getenv('DAFTAR_KEYSTORE'))
+                storePassword System.getenv('DAFTAR_STORE_PASSWORD')
+                keyAlias 'daftar-setareh'
+                keyPassword System.getenv('DAFTAR_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.qa'; versionNameSuffix '-qa' }
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    bundle { language { enableSplit = false } }
+    lint { abortOnError true; checkReleaseBuilds true }
+}
+dependencies { testImplementation 'junit:junit:4.13.2' }

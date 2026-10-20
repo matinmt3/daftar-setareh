@@ -1,0 +1,49 @@
+# Dependencies, generated builds, caches and test output
+node_modules/
+.next/
+out/
+build/
+.gradle/
+.idea/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+*.log
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment and local databases: publish the template only
+.env*
+!.env.example
+.data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+
+# Android SDK paths and private signing material
+local.properties
+.signing/
+android-signing/
+private-data-backup/
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+*.pem
+signing*.json
+signing*.properties
+
+# Distribute binary packages through GitHub Releases
+*.apk
+*.aab
+*.zip
+.DS_Store
+Thumbs.db
